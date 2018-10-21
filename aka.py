@@ -13,12 +13,13 @@ read_data = read_data.values
 data = []
 for d in read_data:
     data.append(np.array([[d[0], d[1]]]))
-training = data[:25]
-testing = data[-16:]
+training = data[:26]
+testing = data[-15:]
 
 funding = 10000
-m = Model()
+m = Model(episode=100)
 plot_x = []
+
 
 for index in range(100):
     funding = 10000
@@ -29,19 +30,22 @@ for index in range(100):
 
         reward = m.calculate_true_return(action, training[i])
         m.store_transition(training[i], action, reward, training[i+1])
-        m.aka_learn()
+    m.aka_learn()
 
+    episode_result = [funding]
     for i in range(len(testing)):
-        if i == len(testing)-1:
-            break
+        # if i == len(testing):
+        #     break
         action = m.choose_action()
 
-        reward = m.calculate_true_return(action, training[i])
-        m.store_transition(training[i], action, reward, training[i+1])
-        m.aka_learn()
-
+        reward = m.calculate_true_return(action, testing[i])
+        if i < len(testing)-1:
+            m.store_transition(testing[i], action, reward, testing[i+1])
+            m.aka_learn()
         funding += funding * reward.item()
-        # print("{}|{}".format(funding, reward.item()))
+
+        episode_result.append(funding)
+
     plot_x.append(funding)
     print(funding)
     print("---------")

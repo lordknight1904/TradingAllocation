@@ -67,14 +67,12 @@ class Model:
         self.episode_observations, self.episode_actions, self.episode_rewards, self.episode_states = [], [], [], []
 
     def ska_learn(self):
-
         s = self.episode_states[-1]
         a = self.episode_actions[-1]
         r = self.episode_rewards[-1]
         s_= self.episode_observations[-1]
 
         e = np.transpose(np.array([[0, 0]]))
-        # true_ret = self.__true_return(a, s)
         rl_ret = self.__rl_return(self, a, s)
         rl_ret_next = self.__rl_return(self, a, s_)
 
@@ -93,25 +91,25 @@ class Model:
 
     def aka_learn(self):
         e = np.transpose(np.array([[0, 0]]))
-        # for i in range(self.episode):
-        for s, a, r, s_ in zip(self.episode_states, self.episode_actions, self.episode_rewards,
-                               self.episode_observations):
-            # true_ret = self.__true_return(a, s)
-            rl_ret = self.__rl_return(self, a, s)
-            rl_ret_next = self.__rl_return(self, a, s_)
+        for i in range(self.episode):
+            for s, a, r, s_ in zip(self.episode_states, self.episode_actions, self.episode_rewards,
+                                   self.episode_observations):
+                # true_ret = self.__true_return(a, s)
+                rl_ret = self.__rl_return(self, a, s)
+                rl_ret_next = self.__rl_return(self, a, s_)
 
-            nabla = self.__calculate_nabla(self, s)
+                nabla = self.__calculate_nabla(self, s)
 
-            delta = r + self.gamma * rl_ret_next - rl_ret
-            e = self.gamma * self.lamda * e + nabla * rl_ret
-            self.theta += self.alpha * delta * e
-            if self.theta[0][0] > 1:
-                self.theta[0][0] = 1
-            if self.theta[0][0] < 0:
-                self.theta[0][0] = 0
-            # years.append(index)
-            self.true_return.append(r)
-            self.rl_return.append(rl_ret)
+                delta = r + self.gamma * rl_ret_next - rl_ret
+                e = self.gamma * self.lamda * e + nabla
+                self.theta += self.alpha * delta * e
+                if self.theta[0][0] > 1:
+                    self.theta[0][0] = 1
+                if self.theta[0][0] < 0:
+                    self.theta[0][0] = 0
+                # years.append(index)
+                self.true_return.append(r)
+                self.rl_return.append(rl_ret)
 
     def plot(self):
         import matplotlib.pyplot as plt
@@ -130,6 +128,26 @@ class Model:
         x = np.linspace(0, 41)
         plt.plot(x, self.theta[0][0] * x + self.theta[1][0])
 
+        plt.ylabel('Value')
+        plt.xlabel('Year')
+        plt.show()
+
+    def manual_plot(self, a2, a3, a4, line):
+        import matplotlib.pyplot as plt
+
+        # setting plot
+        axes = plt.gca()
+        # axes.set_ylim(0, 1)
+        axes.set_xlim(0, len(a4))
+
+        # linear regression line
+        # x = np.linspace(0, len(a2))
+        plt.plot(np.arange(len(a2)), a2, 'b')
+        plt.plot(np.arange(len(a3)), a3, 'g')
+        plt.plot(np.arange(len(a4)), a4, 'r')
+        plt.plot(np.arange(len(a4)), line, 'k')
+
+        plt.gca().legend(('A2', 'A3', 'A4', 'CA_SKA'))
         plt.ylabel('Value')
         plt.xlabel('Year')
         plt.show()
